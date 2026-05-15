@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo:7
+    restart: always
+    volumes:
+      - mongo_data:/data/db
+
+  backend:
+    build: ./backend
+    restart: always
+    environment:
+      MONGO_URL: "mongodb://mongo:27017"
+      DB_NAME: "school_erp"
+      JWT_SECRET: "CHANGE_THIS_TO_A_LONG_RANDOM_STRING"
+      ADMIN_EMAIL: "admin@school.com"
+      ADMIN_PASSWORD: "admin123"
+      # In prod behind Nginx, we allow the proxy
+      CORS_ORIGINS: "*" 
+    depends_on:
+      - mongo
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    restart: always
+    depends_on:
+      - backend
+
+volumes:
+  mongo_data:
